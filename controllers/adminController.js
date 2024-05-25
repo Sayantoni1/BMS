@@ -1,18 +1,14 @@
 const BlogSetting = require('../models/blogSettingModel');
 const User = require('../models/userModel');
-const bcrpt = require('bcrypt');
+const bcrypt = require('bcrypt');
 
 const securePassword = async (password) => {
     try {
-        const passwordHash = await bcrpt.hash(password, 10);
-        return password;
+        const passwordHash = await bcrypt.hash(password, 10);
+        return passwordHash;
     } catch (error) {
         console.log(error.message);
     }
-}
-
-const login = async (req, res) => {
-    res.send('login')
 }
 
 const blogSetup = async (req, res) => {
@@ -50,14 +46,14 @@ const blogSetupSave = async (req, res) => {
             name: name,
             email: email,
             password: password,
-            is_admin:1
+            is_admin: 1
         });
 
         const userData = await user.save();
-        if(userData){
+        if (userData) {
             res.redirect('/login');
-        } else{
-            res.render('blogSetup',{message:'Blog not set up properly!'})
+        } else {
+            res.render('blogSetup', { message: 'Blog not set up properly!' });
         }
 
     } catch (error) {
@@ -65,8 +61,16 @@ const blogSetupSave = async (req, res) => {
     }
 }
 
+const dashboard = async (req,res) => {
+    try {
+        res.render('admin/dashboard');
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+
 module.exports = {
-    login,
     blogSetup,
-    blogSetupSave
+    blogSetupSave,
+    dashboard
 }
