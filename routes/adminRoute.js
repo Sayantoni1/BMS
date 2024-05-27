@@ -6,14 +6,15 @@ const path = require("path");
 const session = require("express-session");
 const config = require("../config/config");
 const adminController = require("../controllers/adminController");
-const adminLoginAuth  = require("../middlewares/adminLoginAuth");
+const adminLoginAuth = require("../middlewares/adminLoginAuth");
 
 admin_route.use(bodyParser.json());
 admin_route.use(bodyParser.urlencoded({ extended: true }));
 
-admin_route.use(session({secret:config.sessionSecret,
-    resave:true,
-    saveUninitialized:true
+admin_route.use(session({
+    secret: config.sessionSecret,
+    resave: true,
+    saveUninitialized: true
 }));
 
 admin_route.set('view engine', 'ejs');
@@ -34,6 +35,8 @@ const upload = multer({ storage: storage });
 
 admin_route.get('/blog-setup', adminController.blogSetup);
 admin_route.post('/blog-setup', upload.single('blog_image'), adminController.blogSetupSave);
-admin_route.get('/dashboard',adminLoginAuth.isLogin, adminController.dashboard);
+admin_route.get('/dashboard', adminLoginAuth.isLogin, adminController.dashboard);
+admin_route.get('/create-post', adminLoginAuth.isLogin, adminController.loadPostDashboard);
+admin_route.post('/create-post', adminLoginAuth.isLogin, adminController.addPost);
 
 module.exports = admin_route;

@@ -16,6 +16,10 @@ app.use('/',adminRoute);
 const userRoute = require("./routes/userRoute");
 app.use('/',userRoute);
 
+//for blog routes
+const blogRoute = require("./routes/blogRoute");
+app.use('/',blogRoute);
+
 app.listen(3000, function () {
     console.log("SERVER IS UP")
 })
