@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const nodemailer = require('nodemailer');
 const randonstring = require('randomstring');
 const config = require('../config/config');
+const adminController = require('../controllers/adminController');
 
 
 const sendResetPasswordMail = async (name, email, token) => {
@@ -19,17 +20,17 @@ const sendResetPasswordMail = async (name, email, token) => {
         });
 
         const mailOptions = {
-            from:config.emailUser,
-            to:email,
-            subject:'Reset Password',
-            html:'<p>Hii '+name+', Please click here to <a href="http://127.0.0.1:3000/reset-password?token='+token+'">Reset</a> Your Password.'
+            from: config.emailUser,
+            to: email,
+            subject: 'Reset Password',
+            html: '<p>Hii ' + name + ', Please click here to <a href="http://127.0.0.1:3000/reset-password?token=' + token + '">Reset</a> Your Password.'
         }
 
-        transport.sendMail(mailOptions,function(error,info){
-            if(error){
+        transport.sendMail(mailOptions, function (error, info) {
+            if (error) {
                 console.log(error);
-            } else{
-                console.log("Email has been sent",info.response);
+            } else {
+                console.log("Email has been sent", info.response);
             }
         })
     } catch (error) {
@@ -53,8 +54,7 @@ const verifyLogin = async (req, res) => {
 
         const userData = await User.findOne({ email: email });
         if (userData) {
-            // const passwordMatch = await bcrypt.compare(password,userData.password);
-            const passwordMatch = password === userData.password
+            const passwordMatch = await bcrypt.compare(password,userData.password);
 
             if (passwordMatch) {
                 req.session.user_id = userData._id;
@@ -113,12 +113,41 @@ const forgetPasswordVerify = async (req, res) => {
             const randomString = randonstring.generate();
 
             await User.updateOne({ email: email }, { $set: { token: randomString } });
-            sendResetPasswordMail(userData.name,userData.email,randomString);
-            res.render('forget-password',{message:"Please check your mail to reset your password"});
+            sendResetPasswordMail(userData.name, userData.email, randomString);
+            res.render('forget-password', { message: "Please check your mail to reset your password" });
         } else {
             res.render('forget-password', { message: "User email is incorrect" });
         }
 
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+
+const resetPasswordLoad = async (req, res) => {
+    try {
+        const token = req.query.token;
+        const tokenData = await User.findOne({token:token});
+
+        if(tokenData){
+            res.render('reset-password',{user_id:tokenData._id});
+        }else{
+            res.render('404');
+        }
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+
+const resetPassword = async (req, res) => {
+    try {
+        const password = req.body.password;
+        const user_id = req.body.user_id;
+
+        const securePassword = await adminController.securePassword(password);
+        await User.findByIdAndUpdate({_id:user_id}, {$set:{password:securePassword, token:''}});
+        res.redirect('/login')
+        
     } catch (error) {
         console.log(error.message);
     }
@@ -130,12 +159,14 @@ module.exports = {
     profile,
     logout,
     forgetLoad,
-    forgetPasswordVerify
+    forgetPasswordVerify,
+    resetPasswordLoad,
+    resetPassword
 }
 
 /*
-express-session - express-session is a middleware module in Express. js that allows us to create sessions
-in web application. It stores session data on the server side, and allows us to track user activity.
+express-session - express-session is a middleware module in Express. js that allows us to create
+& store the session data on the server side, and allows us to track user activity.
 
 
 
@@ -143,7 +174,7 @@ MVC- MODEL VIEW CONTOLLER
 Model: Model represents the structure of data, it is the database part of 
 the application. 
 
-View: View is what is presented tothe user,the UI part.
+View: View is what is presented to the user,i.e the UI part.
 
 Controller:The user interacts with the View,which in turn generates the appropriate requestnow the 
 controller controls the requests of the user and then generates appropriate response which

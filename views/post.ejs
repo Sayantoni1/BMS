@@ -28,8 +28,12 @@
                 <div class="card bg-light">
                     <div class="card-body">
                         <!-- Comment form-->
-                        <form class="mb-4"><textarea class="form-control" rows="3" placeholder="Join the discussion and leave a comment!"></textarea></form>
-                        <!-- Comment with nested comments-->
+                        <h5>Leave a comment</h5>
+                        <form class="mb-4">
+                            <input type="text" name="username" placeholder="Enter your name" required class="form-control mb-3">
+                            <textarea class="form-control" name="comment" rows="3" placeholder="Join the discussion and leave a comment!" required></textarea></form>
+                            <input type="submit" class="btn btn-primary mt-3 mb-3">
+                            <!-- Comment with nested comments-->
                         <div class="d-flex mb-4">
                             <!-- Parent comment-->
                             <div class="flex-shrink-0"><img class="rounded-circle" src="https://dummyimage.com/50x50/ced4da/6c757d.jpg" alt="..." /></div>
